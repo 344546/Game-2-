@@ -5,7 +5,7 @@ pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 
-scale = 0.5
+scale = (1/2)
 s_width = 720
 s_height = 1280
 tile_size = 40
@@ -36,6 +36,14 @@ grid_rect = grid.get_rect()
 grid_rect = pygame.Rect.move(grid_rect, 0, offset*scale)
 grid.set_colorkey((255,0,255))
 pygame.Surface.fill(grid, (255, 0, 255))
+
+deletion_rect = pygame.Surface((s_width*scale, s_width*scale))
+del_rect = deletion_rect.get_rect()
+del_rect = pygame.Rect.move(del_rect, 0, offset*scale)
+deletion_rect.set_colorkey((255,0,255))
+pygame.Surface.fill(deletion_rect, (255, 0, 255))
+pygame.draw.rect(deletion_rect, red, (0, 0, s_width*scale, s_width*scale), width = 10)
+#ADD TRANSPARENT RECT?
 
 grid_state = [[0] * w for _ in range(h)]
 grid_surf_arr = [[] for _ in range(h)]
@@ -115,29 +123,29 @@ class Enemy:
     enemies_pos.append((temp_surf, temp_rect))
     
 class Enemy1(Enemy):
-  defence = 50
-  speed = 1
+  defence = 35
+  speed = 2
   radius = tile_size*scale
 
 class Enemy2(Enemy):
   defence = 15
-  speed = 0.5
-  radius = tile_size*scale
+  speed = 1
+  radius = tile_size*scale*0.9
 
 class Enemy3(Enemy):
   defence = 25
-  speed = 1
+  speed = 2
   radius = tile_size*scale
 
 class EnemyA1(Enemy):
   defence = 10
-  speed = 1
-  radius = tile_size*scale
+  speed = 2
+  radius = tile_size*scale*0.85
 
 class EnemyA2(Enemy):
   defence = 15
-  speed = 1.5
-  radius = tile_size*scale
+  speed = 3
+  radius = tile_size*scale*0.75
 
 tower_list = []
 for tower in Tower.__subclasses__():
@@ -221,6 +229,9 @@ def main():
   state = 'game'
   selection = None
   money = w*Wall.cost
+  enemy_interval = 1/scale
+  enemy_interval_counter = 0
+  float(enemy_interval_counter)
   #health = 100
   while 1:
     for event in pygame.event.get():
@@ -265,7 +276,9 @@ def main():
           pygame.quit()
           sys.exit()
         if event.key == K_0:
-          Enemy1((180, 0))
+          Enemy1((360*scale, 0))
+        if event.key == K_9:
+          print(grid_state)
     for tower in towers:
       i = 0
       for enemy in enemies:
@@ -289,8 +302,9 @@ def main():
       if (len(enemies_pos) != 0 and enemies_pos[e][1].colliderect(buttons_rect)):
         pass
 
-      if (len(enemies_pos) != 0):
-        enemies_pos[e][1].move_ip(0, 1)
+      if (enemy_interval_counter == enemy_interval):
+        if (len(enemies_pos) != 0):
+          enemies_pos[e][1].move_ip(-2, 2)
     
     screen.fill(white)
     screen.blit(bg, (0, 0))
@@ -302,9 +316,16 @@ def main():
       screen.blits(enemies_pos)
       if (len(enemies) == 0):
         screen.blits(next_button)
+      if (selection == 4):
+        screen.blit(deletion_rect, del_rect)
     elif (state == "menu"):
       pass
+    
+    if (enemy_interval_counter == enemy_interval):
+      enemy_interval_counter = 0
+    enemy_interval_counter = enemy_interval_counter + 1.0
     pygame.display.flip()
     clock.tick(60)
+    
 
 main()
